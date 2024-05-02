@@ -75,6 +75,9 @@
             border-radius: 4px;
             cursor: pointer;
         }
+        .copy-button.clicked {
+            background-color: #ff0000; /* Cor vermelha ao ser clicado */
+        }
     </style>
 </head>
 <body>
@@ -140,7 +143,7 @@
         </select>
         
         <label for="upload">Upload (Mbps):</label>
-        <input type="text" id="upload" name="upload" required>
+        <input type="text" id="upload" name="upload" required disabled>
         
         <input type="submit" value="Gerar Código" onclick="generateConfig(event)">
     </form>
@@ -210,7 +213,7 @@ save
                 copyButton.onclick = () => {
                     navigator.clipboard.writeText(line)
                         .then(() => {
-                            alert('Linha copiada para a área de transferência!');
+                            copyButton.classList.add('clicked'); // Adicionar classe para mudar a cor do botão
                         })
                         .catch((err) => {
                             console.error('Erro ao copiar: ', err);
@@ -225,18 +228,12 @@ save
         function updateUpload() {
             const downloadInput = document.getElementById('download');
             const uploadInput = document.getElementById('upload');
-            
-            // Obter o valor selecionado da caixa de seleção de Download como número
-            const downloadValue = parseFloat(downloadInput.value);
+            const selectedDownload = parseFloat(downloadInput.value);
 
-            // Calcular o valor do Upload como metade do Download (inteiro)
-            const uploadValue = Math.floor(downloadValue / 2);
-
-            // Atualizar o valor do campo Upload com o resultado
-            uploadInput.value = uploadValue.toString(); // O valor do upload é tratado como número inteiro
+            const uploadValue = Math.floor(selectedDownload / 2);
+            uploadInput.value = uploadValue.toString();
         }
 
-        // Função para exibir a descrição da porta PON selecionada
         const ponSelect = document.getElementById('pon');
         const descriptionParagraph = document.getElementById('ponDescription');
         ponSelect.addEventListener('change', () => {
@@ -259,7 +256,6 @@ save
             }
         });
 
-        // Preencher as opções para ONU ID de 0 a 128
         const onuIdSelect = document.getElementById('onuId');
         for (let i = 0; i <= 128; i++) {
             const option = document.createElement('option');

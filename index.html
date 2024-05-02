@@ -131,7 +131,13 @@
         </select>
         
         <label for="download">Download (Mbps):</label>
-        <input type="text" id="download" name="download" required oninput="updateUpload()">
+        <select id="download" name="download" required onchange="updateUpload()">
+            <option value="100">100 Mbps</option>
+            <option value="200">200 Mbps</option>
+            <option value="400">400 Mbps</option>
+            <option value="600">600 Mbps</option>
+            <option value="1000">1000 Mbps</option>
+        </select>
         
         <label for="upload">Upload (Mbps):</label>
         <input type="text" id="upload" name="upload" required>
@@ -220,14 +226,14 @@ save
             const downloadInput = document.getElementById('download');
             const uploadInput = document.getElementById('upload');
             
-            // Obter o valor do campo Download como número
+            // Obter o valor selecionado da caixa de seleção de Download como número
             const downloadValue = parseFloat(downloadInput.value);
 
             // Calcular o valor do Upload como metade do Download (inteiro)
             const uploadValue = Math.floor(downloadValue / 2);
 
             // Atualizar o valor do campo Upload com o resultado
-            uploadInput.value = uploadValue; // O valor do upload é tratado como número inteiro
+            uploadInput.value = uploadValue.toString(); // O valor do upload é tratado como número inteiro
         }
 
         // Função para exibir a descrição da porta PON selecionada

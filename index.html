@@ -176,7 +176,7 @@ interface gpon ${frame}/${slot}
 ont add ${pon} sn-auth ${serialNumber} omci ont-lineprofile-id ${lineProfileID} ont-srvprofile-id ${serviceProfileID} desc "${clientName}"
 ont ipconfig ${pon} ${onuId} pppoe vlan ${vlan} priority 5 user-account username ${username} password ${password}
 ont wan-config ${pon} ${onuId} ip-index 0 profile-id ${serviceProfileID}
-ont internet-config ${pon} 1 ip-index 0
+ont internet-config ${pon} ${onuId} ip-index 0
 ont port route ${pon} ${onuId} eth 1 enable
 ont port route ${pon} ${onuId} eth 2 enable
 ont port route ${pon} ${onuId} eth 3 enable

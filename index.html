@@ -1,213 +1,268 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Diário de Troca de Turno</title>
+    <title>Configuração GPON</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            height: 100vh;
-            overflow: hidden;
-        }
-
-        .container {
-            display: flex;
-            width: 100%;
-            height: 100%;
-        }
-
-        .form-container {
-            flex: 1;
-            max-width: 50%;
-            background: rgba(255, 255, 255, 0.3);
+            background-color: #f5f5f5;
             padding: 20px;
-            border-radius: 15px;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            display: flex;
-            flex-direction: column;
+            display: grid;
+            grid-template-columns: 1fr 1fr; /* Dividir em duas colunas */
+            gap: 20px;
         }
-
-        .entries-container {
-            flex: 1;
-            max-width: 50%;
-            background: rgba(255, 255, 255, 0.1);
-            padding: 20px;
-            border-radius: 15px;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
-            display: flex;
-            flex-direction: column;
-            overflow-y: auto;
-        }
-
-        h1, h2 {
+        h2 {
             text-align: center;
             color: #333;
-            font-size: 24px;
+            grid-column: span 2; /* Expandir sobre duas colunas */
         }
-
-        @media(min-width: 768px) {
-            h1 {
-                font-size: 32px;
-            }
-            h2 {
-                font-size: 28px;
-            }
-        }
-
         form {
-            display: flex;
-            flex-direction: column;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
-
         label {
-            margin-bottom: 5px;
-            color: #555;
-            font-size: 16px;
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
         }
-
-        input, textarea, select {
-            margin-bottom: 15px;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
+        input[type="text"],
+        input[type="password"],
+        select,
+        input[type="submit"] {
             width: 100%;
-            font-size: 16px;
-        }
-
-        button {
             padding: 10px;
-            border: none;
-            border-radius: 5px;
-            background: #007BFF;
-            color: white;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        input[type="submit"] {
+            background-color: #4CAF50;
+            color: #fff;
             cursor: pointer;
-            font-size: 16px;
         }
-
-        button:hover {
-            background: #0056b3;
+        input[type="submit"]:hover {
+            background-color: #45a049;
         }
-
-        #copy-button {
-            margin-top: 10px;
-            background: #28a745;
+        .result-container {
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
-
-        #copy-button:hover {
-            background: #218838;
+        table {
+            width: 100%;
+            border-collapse: collapse;
         }
-
-        .entry {
-            background: rgba(255, 255, 255, 0.7);
-            padding: 10px;
-            border-radius: 5px;
-            margin-bottom: 10px;
-            backdrop-filter: blur(5px);
-            -webkit-backdrop-filter: blur(5px);
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .copy-button {
+            padding: 5px 10px;
+            background-color: #4CAF50;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .copy-button.clicked {
+            background-color: #ff0000; /* Cor vermelha ao ser clicado */
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="form-container">
-            <h1>Diário de Troca de Turno</h1>
-            <form id="diario-form">
-                <label for="inc-number">Número do INC:</label>
-                <input type="text" id="inc-number" name="inc-number" required>
+    <h2>Configuração GPON</h2>
+    <form id="gponForm">
+        <label for="serialNumber">Serial Number:</label>
+        <input type="text" id="serialNumber" name="serialNumber" required>
 
-                <label for="status">Status:</label>
-                <select id="status" name="status" required>
-                    <option value="aberto">Aberto</option>
-                    <option value="em-andamento">Em Andamento</option>
-                    <option value="resolvido">Resolvido</option>
-                    <option value="fechado">Fechado</option>
-                </select>
+        <div class="compact-fields">
+            <label for="frame">Frame:</label>
+            <select id="frame" name="frame">
+                <option value="0">0</option>
+            </select>
 
-                <label for="comments">Comentários:</label>
-                <textarea id="comments" name="comments" rows="5" required></textarea>
+            <label for="slot">Slot:</label>
+            <select id="slot" name="slot">
+                <option value="1">1</option>
+            </select>
 
-                <button type="submit">Adicionar Entrada</button>
-            </form>
+            <label for="pon">Porta PON:</label>
+            <select id="pon" name="pon">
+                <option value="0">0</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+                <option value="7">7</option>
+            </select>
+            <p id="ponDescription"></p> <!-- Parágrafo para exibir a descrição -->
+
+            <label for="onuId">ONU ID:</label>
+            <select id="onuId" name="onuId" required></select>
         </div>
-        <div class="entries-container">
-            <h2>Entradas Recentes</h2>
-            <div id="entries">
-                <!-- Entradas serão adicionadas aqui -->
-            </div>
-            <button id="copy-button">Copiar Todos os INCs</button>
-        </div>
-    </div>
+
+        <input type="hidden" id="lineProfileID" name="lineProfileID" value="1">
+        <input type="hidden" id="gemport" name="gemport" value="1">
+        <input type="hidden" id="serviceProfileID" name="serviceProfileID" value="1">
+
+        <label for="username">PPPoE Username:</label>
+        <input type="text" id="username" name="username" required>
+
+        <label for="password">PPPoE Password:</label>
+        <input type="text" id="password" name="password" required>
+
+        <label for="clientName">Nome Cliente:</label>
+        <input type="text" id="clientName" name="clientName" required>
+
+        <label for="vlan">VLAN:</label>
+        <select id="vlan" name="vlan">
+            <option value="3512">3512 (OLT SEDE)</option>
+            <option value="3513">3513 (OLT OLHO DAGUA)</option>
+        </select>
+
+        <label for="download">Download (Mbps):</label>
+        <select id="download" name="download" required onchange="updateUpload()">
+            <option value="100">100 Mbps</option>
+            <option value="200">200 Mbps</option>
+            <option value="400">400 Mbps</option>
+            <option value="600">600 Mbps</option>
+            <option value="1000">1000 Mbps</option>
+        </select>
+
+        <label for="upload">Upload (Mbps):</label>
+        <input type="text" id="upload" name="upload" required disabled>
+
+        <input type="submit" value="Gerar Código" onclick="generateConfig(event)">
+    </form>
+
+    <div id="resultContainer" class="result-container"></div>
 
     <script>
-        function getCurrentDateTime() {
-            const currentDate = new Date();
-            const formattedDate = `*${currentDate.toLocaleDateString()} ${currentDate.toLocaleTimeString()}*`;
-            return formattedDate;
+        function generateConfig(event) {
+            event.preventDefault(); // Evitar o envio real do formulário
+
+            const serialNumber = document.getElementById('serialNumber').value;
+            const frame = document.getElementById('frame').value;
+            const slot = document.getElementById('slot').value;
+            const pon = document.getElementById('pon').value;
+            const lineProfileID = document.getElementById('lineProfileID').value;
+            const gemport = document.getElementById('gemport').value;
+            const serviceProfileID = document.getElementById('serviceProfileID').value;
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const clientName = document.getElementById('clientName').value;
+            const vlan = document.getElementById('vlan').value;
+            const download = document.getElementById('download').value;
+            const upload = document.getElementById('upload').value;
+            const onuId = document.getElementById('onuId').value;
+
+            const configCode = `
+enable
+config
+interface gpon ${frame}/${slot}
+ont add ${pon} sn-auth ${serialNumber} omci ont-lineprofile-id ${lineProfileID} ont-srvprofile-id ${serviceProfileID} desc "${clientName}"
+ont ipconfig ${pon} ${onuId} pppoe vlan ${vlan} priority 5 user-account username ${username} password ${password}
+ont wan-config ${pon} ${onuId} ip-index 0 profile-id ${serviceProfileID}
+ont internet-config ${pon} ${onuId} ip-index 0
+ont port route ${pon} ${onuId} eth 1 enable
+ont port route ${pon} ${onuId} eth 2 enable
+ont port route ${pon} ${onuId} eth 3 enable
+ont port route ${pon} ${onuId} eth 4 enable
+q
+service-port vlan ${vlan} gpon ${frame}/${slot}/${pon} ont ${onuId} gemport ${gemport} multi-service user-vlan ${vlan} tag-transform translate rx-cttr ${download} tx-cttr ${upload}
+diagnose
+ont wan-access http ${frame}/${slot}/${pon} ${onuId} enable
+q
+save
+`;
+
+            const resultContainer = document.getElementById('resultContainer');
+            resultContainer.innerHTML = ''; // Limpar conteúdo anterior
+
+            const table = document.createElement('table');
+            const headerRow = table.insertRow();
+            ['Configuração', 'Ação'].forEach((headerText) => {
+                const th = document.createElement('th');
+                th.textContent = headerText;
+                headerRow.appendChild(th);
+            });
+
+            const lines = configCode.trim().split('\n');
+            lines.forEach((line) => {
+                const row = table.insertRow();
+                const configCell = row.insertCell();
+                configCell.textContent = line;
+
+                const copyCell = row.insertCell();
+                const copyButton = document.createElement('button');
+                copyButton.textContent = 'Copiar';
+                copyButton.classList.add('copy-button');
+                copyButton.onclick = () => {
+                    navigator.clipboard.writeText(line)
+                        .then(() => {
+                            copyButton.classList.add('clicked'); // Adicionar classe para mudar a cor do botão
+                        })
+                        .catch((err) => {
+                            console.error('Erro ao copiar: ', err);
+                        });
+                };
+                copyCell.appendChild(copyButton);
+            });
+
+            resultContainer.appendChild(table);
         }
 
-        document.getElementById('diario-form').addEventListener('submit', function(event) {
-            event.preventDefault();
-            
-            // Coletar dados do formulário
-            const incNumber = document.getElementById('inc-number').value.trim();
-            const status = document.getElementById('status').value.trim();
-            const comments = document.getElementById('comments').value.trim();
+        function updateUpload() {
+            const downloadInput = document.getElementById('download');
+            const uploadInput = document.getElementById('upload');
+            const selectedDownload = parseFloat(downloadInput.value);
 
-            // Verificar se o INC já existe
-            const existingEntries = document.querySelectorAll('.entry');
-            for (let entry of existingEntries) {
-                const existingINC = entry.querySelector('p:nth-child(1)').textContent.split(': ')[1].trim();
-                if (existingINC === incNumber) {
-                    alert('Este INC já foi adicionado anteriormente.');
-                    return;
-                }
+            const uploadValue = Math.floor(selectedDownload / 2);
+            uploadInput.value = uploadValue.toString();
+        }
+
+        const ponSelect = document.getElementById('pon');
+        const descriptionParagraph = document.getElementById('ponDescription');
+        ponSelect.addEventListener('change', () => {
+            const selectedValue = parseInt(ponSelect.value);
+            const descriptions = [
+                "GRAN VILLAGE ARACAGY 1",
+                "GRAN VILLAGE ARACAGY 2",
+                "COND. SPORT GARDENS",
+                "COND. GRAND PARK PASSAROS",
+                "COND. GRAND PARK AGUAS",
+                "COND. GRAND PARK BARCELONA",
+                "COND. BOSQUE DOS PINHEIROS",
+                "COND. ALLIANCE"
+            ];
+
+            if (!isNaN(selectedValue) && selectedValue >= 0 && selectedValue < descriptions.length) {
+                descriptionParagraph.textContent = descriptions[selectedValue];
+            } else {
+                descriptionParagraph.textContent = '';
             }
-
-            // Criar nova entrada
-            const entry = document.createElement('div');
-            entry.classList.add('entry');
-            entry.innerHTML = `
-                <p><strong>Número do INC:</strong> ${incNumber}</p>
-                <p><strong>Status:</strong> ${status}</p>
-                <p><strong>Comentários:</strong> ${comments}</p>
-            `;
-
-            // Adicionar entrada ao container
-            document.getElementById('entries').appendChild(entry);
-
-            // Limpar formulário
-            document.getElementById('diario-form').reset();
         });
 
-        document.getElementById('copy-button').addEventListener('click', function() {
-            const entries = document.querySelectorAll('.entry');
-            let incDetails = [];
-
-            // Adiciona a máscara e a função para pegar data e hora
-            incDetails.push(`*Passagem de Turno T2>T3*\n\n${getCurrentDateTime()}`);
-            incDetails.push(""); // Nova linha conforme solicitado
-
-            entries.forEach((entry, index) => {
-                const incNumber = entry.querySelector('p:nth-child(1)').textContent.split(': ')[1];
-                const status = entry.querySelector('p:nth-child(2)').textContent.split(': ')[1];
-                const comments = entry.querySelector('p:nth-child(3)').textContent.split(': ')[1];
-                incDetails.push(`*${index + 1} - INC:* ${incNumber}\n*Status:* ${status}\n*Comentários:* ${comments}`);
-            });
-
-            const incDetailsText = incDetails.join('\n\n');
-            navigator.clipboard.writeText(incDetailsText).then(() => {
-                alert('Todos os INCs foram copiados para a área de transferência.');
-            });
-        });
+        const onuIdSelect = document.getElementById('onuId');
+        for (let i = 0; i <= 128; i++) {
+            const option = document.createElement('option');
+            option.value = i;
+            option.textContent = i;
+            onuIdSelect.appendChild(option);
+        }
     </script>
 </body>
 </html>

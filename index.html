@@ -32,7 +32,8 @@
         input[type="text"],
         input[type="password"],
         select,
-        input[type="submit"] {
+        input[type="submit"],
+        .doc-button {
             width: 100%;
             padding: 10px;
             margin-bottom: 15px;
@@ -40,12 +41,14 @@
             border-radius: 4px;
             box-sizing: border-box;
         }
-        input[type="submit"] {
+        input[type="submit"],
+        .doc-button {
             background-color: #4CAF50;
             color: #fff;
             cursor: pointer;
         }
-        input[type="submit"]:hover {
+        input[type="submit"]:hover,
+        .doc-button:hover {
             background-color: #45a049;
         }
         .result-container {
@@ -77,6 +80,10 @@
         }
         .copy-button.clicked {
             background-color: #ff0000; /* Cor vermelha ao ser clicado */
+        }
+        .button-group {
+            display: flex;
+            justify-content: space-between;
         }
     </style>
 </head>
@@ -145,7 +152,10 @@
         <label for="upload">Upload (Mbps):</label>
         <input type="text" id="upload" name="upload" required disabled>
 
-        <input type="submit" value="Gerar Código" onclick="generateConfig(event)">
+        <div class="button-group">
+            <input type="submit" value="Gerar Código" onclick="generateConfig(event)">
+            <button type="button" class="doc-button" onclick="openDocumentation()">Documentação</button>
+        </div>
     </form>
 
     <div id="resultContainer" class="result-container"></div>
@@ -188,7 +198,6 @@ diagnose
 ont wan-access http ${frame}/${slot}/${pon} ${onuId} enable
 quit
 save
-https://abounding-earthworm-5a0.notion.site/Instalac-a-o-ONU-HUAWAY-8384ab0e21b947c683aeb03796b8b911?pvs=4
 `;
 
             const resultContainer = document.getElementById('resultContainer');
@@ -212,14 +221,15 @@ https://abounding-earthworm-5a0.notion.site/Instalac-a-o-ONU-HUAWAY-8384ab0e21b9
                 const copyButton = document.createElement('button');
                 copyButton.textContent = 'Copiar';
                 copyButton.classList.add('copy-button');
-                copyButton.onclick = () => {
-                    navigator.clipboard.writeText(line)
-                        .then(() => {
-                            copyButton.classList.add('clicked'); // Adicionar classe para mudar a cor do botão
-                        })
-                        .catch((err) => {
-                            console.error('Erro ao copiar: ', err);
-                        });
+                copyButton.onclick = function () {
+                    navigator.clipboard.writeText(line).then(() => {
+                        copyButton.textContent = 'Copiado!';
+                        copyButton.classList.add('clicked');
+                        setTimeout(() => {
+                            copyButton.textContent = 'Copiar';
+                            copyButton.classList.remove('clicked');
+                        }, 2000);
+                    });
                 };
                 copyCell.appendChild(copyButton);
             });
@@ -228,43 +238,41 @@ https://abounding-earthworm-5a0.notion.site/Instalac-a-o-ONU-HUAWAY-8384ab0e21b9
         }
 
         function updateUpload() {
-            const downloadInput = document.getElementById('download');
+            const download = document.getElementById('download').value;
             const uploadInput = document.getElementById('upload');
-            const selectedDownload = parseFloat(downloadInput.value);
 
-            const uploadValue = Math.floor(selectedDownload / 2);
-            uploadInput.value = uploadValue.toString();
+            // Calcular a taxa de upload com base na taxa de download
+            const uploadRate = parseInt(download) * 0.3; // 30% do download como exemplo
+            uploadInput.value = uploadRate;
         }
 
-        const ponSelect = document.getElementById('pon');
-        const descriptionParagraph = document.getElementById('ponDescription');
-        ponSelect.addEventListener('change', () => {
-            const selectedValue = parseInt(ponSelect.value);
-            const descriptions = [
-                "GRAN VILLAGE ARACAGY 1",
-                "GRAN VILLAGE ARACAGY 2",
-                "COND. SPORT GARDENS",
-                "COND. GRAND PARK PASSAROS",
-                "COND. GRAND PARK AGUAS",
-                "COND. GRAND PARK BARCELONA",
-                "COND. BOSQUE DOS PINHEIROS",
-                "COND. ALLIANCE"
-            ];
+        function openDocumentation() {
+            window.open("https://www.notion.so/Instalac-a-o-ONU-HUAWAY-8384ab0e21b947c683aeb03796b8b911?ref=Link", "_blank");
+        }
 
-            if (!isNaN(selectedValue) && selectedValue >= 0 && selectedValue < descriptions.length) {
-                descriptionParagraph.textContent = descriptions[selectedValue];
-            } else {
-                descriptionParagraph.textContent = '';
+        function populateOnuId() {
+            const onuIdSelect = document.getElementById('onuId');
+            for (let i = 1; i <= 128; i++) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = i;
+                onuIdSelect.appendChild(option);
             }
-        });
-
-        const onuIdSelect = document.getElementById('onuId');
-        for (let i = 0; i <= 128; i++) {
-            const option = document.createElement('option');
-            option.value = i;
-            option.textContent = i;
-            onuIdSelect.appendChild(option);
         }
+
+        function updatePonDescription() {
+            const ponSelect = document.getElementById('pon');
+            const description = ponSelect.value < 4 ? 'Reutilização da SEDE' : 'Reutilização de OLHO DAGUA';
+            document.getElementById('ponDescription').textContent = description;
+        }
+
+        document.getElementById('pon').addEventListener('change', updatePonDescription);
+
+        // Popula a lista de ONU ID ao carregar a página
+        window.onload = function () {
+            populateOnuId();
+            updatePonDescription(); // Atualiza a descrição ao carregar a página
+        };
     </script>
 </body>
 </html>

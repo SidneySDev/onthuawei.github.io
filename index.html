@@ -172,6 +172,7 @@
             const configCode = `
 enable
 config
+display ont autofind all
 interface gpon ${frame}/${slot}
 ont add ${pon} sn-auth ${serialNumber} omci ont-lineprofile-id ${lineProfileID} ont-srvprofile-id ${serviceProfileID} desc "${clientName}"
 ont ipconfig ${pon} ${onuId} pppoe vlan ${vlan} priority 5 user-account username ${username} password ${password}
@@ -181,12 +182,13 @@ ont port route ${pon} ${onuId} eth 1 enable
 ont port route ${pon} ${onuId} eth 2 enable
 ont port route ${pon} ${onuId} eth 3 enable
 ont port route ${pon} ${onuId} eth 4 enable
-q
+quit
 service-port vlan ${vlan} gpon ${frame}/${slot}/${pon} ont ${onuId} gemport ${gemport} multi-service user-vlan ${vlan} tag-transform translate rx-cttr ${download} tx-cttr ${upload}
 diagnose
 ont wan-access http ${frame}/${slot}/${pon} ${onuId} enable
-q
+quit
 save
+https://www.notion.so/Instalac-a-o-ONU-HUAWAY-8384ab0e21b947c683aeb03796b8b911
 `;
 
             const resultContainer = document.getElementById('resultContainer');

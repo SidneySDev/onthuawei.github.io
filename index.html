@@ -159,10 +159,10 @@
     <!-- Formulário 2 (Lado Esquerdo) -->
     <form id="userForm">
         <label for="nome" >Nome:</label>
-        <input type="text" id="nome" name="nome" placeholder="Digite o primeiro nome do cliente" required >
+        <input type="text" id="nome" name="nome" placeholder="Digite o primeiro nome do cliente" required pattern="^\S+">
 
         <label for="cpf">CPF:</label>
-        <input type="text" id="cpf" name="cpf" placeholder="Digite os 6 primeiros digitos do cpf do cliente" required>
+        <input type="text" id="cpf" name="cpf" placeholder="Digite os 6 primeiros digitos do cpf do cliente" required pattern="^\d{3}\.\d{3}\.\d{3}-\d{2}$">
 
         <input type="submit" value="Gerar Código" onclick="generateUserConfig(event)">
     </form>
@@ -252,15 +252,26 @@ Eqtl#T3l3com
         function generateUserConfig(event) {
             event.preventDefault(); // Evitar o envio real do formulário
 
-            const nome = document.getElementById('nome').value;
-            const cpf = document.getElementById('cpf').value;
+            const nomeInput = document.getElementById('nome');
+            const cpfInput = document.getElementById('cpf');
+
+            // Regex para pegar apenas o primeiro nome
+            const nome = nomeInput.value.match(/^\S+/)[0];
+
+            // Regex para validar e formatar o CPF
+            const cpf = cpfInput.value.replace(/\D/g, ''); // Remove todos os não dígitos
+            if (cpf.length !== 11) {
+                alert('CPF inválido. Por favor, insira um CPF válido.');
+                return;
+            }
+            const cpfFormatado = cpf.substring(0, 6); // Pega os 6 primeiros dígitos
 
             // Lógica de concatenação
-            const user = cpf.substring(0, 6) + nome; // Primeiros 6 dígitos do CPF + nome
-            const cpfFormatado = cpf.substring(0, 6)+'@'+nome; // Nome + primeiros 6 dígitos do CPF
+            const user = cpfFormatado + nome; // Primeiros 6 dígitos do CPF + nome
+            const cpfFinal = cpfFormatado + '@' + nome; // Nome + primeiros 6 dígitos do CPF
 
             const userConfigCode = `
-local-user ${user} password cipher ${cpfFormatado}
+local-user ${user} password cipher ${cpfFinal}
 local-user ${user} service-type ppp
 local-user ${user} state block fail-times 3 interval 1
 commit
@@ -327,6 +338,15 @@ commit
             option.textContent = i;
             onuIdSelect.appendChild(option);
         }
+
+        // Formatação do CPF
+        const cpfInput = document.getElementById('cpf');
+        cpfInput.addEventListener('input', (e) => {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length > 11) value = value.substring(0, 11);
+            value = value.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+            e.target.value = value;
+        });
     </script>
 </body>
 </html>

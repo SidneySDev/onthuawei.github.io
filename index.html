@@ -208,6 +208,8 @@
 				ont wan-access http ${frame}/${slot}/${pon} ${onuId} enable
 				q
 				save
+    				q
+				display ont info ${pon} ${onuId}
 				`;
 
             const resultContainer = document.getElementById('resultContainer');

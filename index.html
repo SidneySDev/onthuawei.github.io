@@ -9,25 +9,98 @@
             font-family: Arial, sans-serif;
             background-color: #f5f5f5;
             padding: 20px;
-            display: grid;
-            grid-template-columns: 1fr 1fr; /* Duas colunas */
+            display: flex;
+            flex-direction: column;
             gap: 20px;
+            min-height: 100vh;
+            margin: 0;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        body.dark-theme {
+            background-color: #333;
+            color: #fff;
         }
         h2 {
             text-align: center;
-            color: #333;
-            grid-column: span 2; /* Título ocupa duas colunas */
+            color: inherit;
         }
-        form {
+        .form-container {
+            display: none;
             background-color: #fff;
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        .dark-theme .form-container {
+            background-color: #444;
+            color: #fff;
+        }
+        .form-container.active {
+            display: flex;
+            gap: 20px;
+        }
+        .form-inputs {
+            flex: 1;
+        }
+        .result-container {
+            flex: 1;
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        .dark-theme .result-container {
+            background-color: #555;
+            color: #fff;
+        }
+        .dock {
+            position: fixed;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            background-color: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            transition: background-color 0.3s ease;
+        }
+        .dark-theme .dock {
+            background-color: rgba(51, 51, 51, 0.8);
+        }
+        .icon {
+            font-size: 24px;
+            cursor: pointer;
+            padding: 10px;
+            margin: 0 5px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.9);
+            color: #333;
+            transition: transform 0.2s ease, background-color 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 50px;
+            height: 50px;
+        }
+        .dark-theme .icon {
+            background-color: rgba(51, 51, 51, 0.9);
+            color: #fff;
+        }
+        .icon:hover {
+            transform: scale(1.2) translateY(-10px);
+            background-color: rgba(76, 175, 80, 0.9);
+            color: #fff;
         }
         label {
             display: block;
             margin-bottom: 8px;
-            color: #333;
+            color: inherit;
         }
         input[type="text"],
         input[type="password"],
@@ -39,6 +112,17 @@
             border: 1px solid #ccc;
             border-radius: 4px;
             box-sizing: border-box;
+            background-color: #fff;
+            color: #333;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        .dark-theme input[type="text"],
+        .dark-theme input[type="password"],
+        .dark-theme select,
+        .dark-theme input[type="submit"] {
+            background-color: #555;
+            color: #fff;
+            border-color: #777;
         }
         input[type="submit"] {
             background-color: #4CAF50;
@@ -47,12 +131,6 @@
         }
         input[type="submit"]:hover {
             background-color: #45a049;
-        }
-        .result-container {
-            background-color: #f9f9f9;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
         table {
             width: 100%;
@@ -76,103 +154,193 @@
             cursor: pointer;
         }
         .copy-button.clicked {
-            background-color: #ff0000; /* Cor vermelha ao ser clicado */
+            background-color: #ff0000;
+        }
+        .input-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .input-container i {
+            margin-right: 10px;
+            color: #4CAF50;
+            font-size: 18px;
+        }
+        .input-container input,
+        .input-container select {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .input-container input:focus,
+        .input-container select:focus {
+            border-color: #4CAF50;
+            box-shadow: 0 0 5px rgba(76, 175, 80, 0.5);
         }
     </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 </head>
 
-<body>
+<body class="light-theme">
     <h2>Configuração GPON</h2>
 
-    <!-- Formulário 1 (Lado Esquerdo) -->
-    <form id="gponForm">
-        <label for="serialNumber">Serial Number:</label>
-        <input type="text" id="serialNumber" name="serialNumber" required="">
+    <!-- Formulário 1: Configuração GPON -->
+    <div id="gponFormContainer" class="form-container active">
+        <div class="form-inputs">
+            <form id="gponForm">
+                <div class="input-container">
+                    <i class="fas fa-barcode"></i>
+                    <input type="text" id="serialNumber" name="serialNumber" placeholder="Serial Number" required>
+                </div>
 
-        <div class="compact-fields">
-            <label for="frame">Frame:</label>
-            <select id="frame" name="frame">
-                <option value="0">0</option>
-            </select>
+                <div class="input-container">
+                    <i class="fas fa-layer-group"></i>
+                    <select id="frame" name="frame">
+                        <option value="0">Frame: 0</option>
+                    </select>
+                </div>
 
-            <label for="slot">Slot:</label>
-            <select id="slot" name="slot">
-                <option value="1">1</option>
-            </select>
+                <div class="input-container">
+                    <i class="fas fa-cube"></i>
+                    <select id="slot" name="slot">
+                        <option value="1">Slot: 1</option>
+                    </select>
+                </div>
 
-            <label for="pon">Porta PON:</label>
-            <select id="pon" name="pon">
-                <option value="0">0</option>
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
-                <option value="4">4</option>
-                <option value="5">5</option>
-                <option value="6">6</option>
-                <option value="7">7</option>
-            </select>
-            <p id="ponDescription"></p> <!-- Parágrafo para exibir a descrição -->
+                <div class="input-container">
+                    <i class="fas fa-plug"></i>
+                    <select id="pon" name="pon">
+                        <option value="0">Porta PON: 0</option>
+                        <option value="1">Porta PON: 1</option>
+                        <option value="2">Porta PON: 2</option>
+                        <option value="3">Porta PON: 3</option>
+                        <option value="4">Porta PON: 4</option>
+                        <option value="5">Porta PON: 5</option>
+                        <option value="6">Porta PON: 6</option>
+                        <option value="7">Porta PON: 7</option>
+                    </select>
+                </div>
+                <p id="ponDescription"></p>
 
-            <label for="onuId">ONU ID:</label>
-            <select id="onuId" name="onuId" required="">
-                <!-- Opções de 0 a 128 -->
-            </select>
+                <div class="input-container">
+                    <i class="fas fa-id-card"></i>
+                    <select id="onuId" name="onuId" required>
+                        <!-- Opções de 0 a 128 -->
+                    </select>
+                </div>
+
+                <input type="hidden" id="lineProfileID" name="lineProfileID" value="1">
+                <input type="hidden" id="gemport" name="gemport" value="1">
+                <input type="hidden" id="serviceProfileID" name="serviceProfileID" value="1">
+
+                <div class="input-container">
+                    <i class="fas fa-user"></i>
+                    <input type="text" id="username" name="username" placeholder="PPPoE Username" required>
+                </div>
+
+                <div class="input-container">
+                    <i class="fas fa-key"></i>
+                    <input type="text" id="password" name="password" placeholder="PPPoE Password" required>
+                </div>
+
+                <div class="input-container">
+                    <i class="fas fa-user-tag"></i>
+                    <input type="text" id="clientName" name="clientName" placeholder="Nome Cliente" required>
+                </div>
+
+                <div class="input-container">
+                    <i class="fas fa-network-wired"></i>
+                    <select id="vlan" name="vlan">
+                        <option value="3512">VLAN: 3512 (OLT SEDE)</option>
+                        <option value="3513">VLAN: 3513 (OLT OLHO DAGUA)</option>
+                    </select>
+                </div>
+
+                <div class="input-container">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <select id="download" name="download" required onchange="updateUpload()">
+                        <option value="100">Download: 100 Mbps</option>
+                        <option value="200">Download: 200 Mbps</option>
+                        <option value="400">Download: 400 Mbps</option>
+                        <option value="600">Download: 600 Mbps</option>
+                        <option value="1000">Download: 1000 Mbps</option>
+                    </select>
+                </div>
+
+                <div class="input-container">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <input type="text" id="upload" name="upload" placeholder="Upload (Mbps)" required disabled>
+                </div>
+
+                <input type="submit" value="Gerar Código" onclick="generateConfig(event)">
+            </form>
         </div>
 
-        <input type="hidden" id="lineProfileID" name="lineProfileID" value="1">
-        <input type="hidden" id="gemport" name="gemport" value="1">
-        <input type="hidden" id="serviceProfileID" name="serviceProfileID" value="1">
+        <div class="result-container" id="resultContainer"></div>
+    </div>
 
-        <label for="username">PPPoE Username:</label>
-        <input type="text" id="username" name="username" required="">
+    <!-- Formulário 2: Configuração de Usuário -->
+    <div id="userFormContainer" class="form-container">
+        <div class="form-inputs">
+            <form id="userForm">
+                <div class="input-container">
+                    <i class="fas fa-user"></i>
+                    <input type="text" id="nome" name="nome" placeholder="Nome do Cliente" required pattern="^\S+">
+                </div>
 
-        <label for="password">PPPoE Password:</label>
-        <input type="text" id="password" name="password" required="">
+                <div class="input-container">
+                    <i class="fas fa-id-card"></i>
+                    <input type="text" id="cpf" name="cpf" placeholder="CPF (6 primeiros dígitos)" required pattern="^\d{3}\.\d{3}\.\d{3}-\d{2}$">
+                </div>
 
-        <label for="clientName">Nome Cliente:</label>
-        <input type="text" id="clientName" name="clientName" required="">
+                <input type="submit" value="Gerar Código" onclick="generateUserConfig(event)">
+            </form>
+        </div>
 
-        <label for="vlan">VLAN:</label>
-        <select id="vlan" name="vlan">
-            <option value="3512">3512 (OLT SEDE)</option>
-            <option value="3513">3513 (OLT OLHO DAGUA)</option>
-        </select>
+        <div class="result-container" id="userResultContainer"></div>
+    </div>
 
-        <label for="download">Download (Mbps):</label>
-        <select id="download" name="download" required="" onchange="updateUpload()">
-            <option value="100">100 Mbps</option>
-            <option value="200">200 Mbps</option>
-            <option value="400">400 Mbps</option>
-            <option value="600">600 Mbps</option>
-            <option value="1000">1000 Mbps</option>
-        </select>
-
-        <label for="upload">Upload (Mbps):</label>
-        <input type="text" id="upload" name="upload" required="" disabled="">
-
-        <input type="submit" value="Gerar Código" onclick="generateConfig(event)">
-    </form>
-
-    <!-- Resultado do Formulário 1 (Lado Direito) -->
-    <div id="resultContainer" class="result-container"></div>
-
-    <!-- Formulário 2 (Lado Esquerdo) -->
-    <form id="userForm">
-        <label for="nome" >Nome:</label>
-        <input type="text" id="nome" name="nome" placeholder="Digite o primeiro nome do cliente" required pattern="^\S+">
-
-        <label for="cpf">CPF:</label>
-        <input type="text" id="cpf" name="cpf" placeholder="Digite os 6 primeiros digitos do cpf do cliente" required pattern="^\d{3}\.\d{3}\.\d{3}-\d{2}$">
-
-        <input type="submit" value="Gerar Código" onclick="generateUserConfig(event)">
-    </form>
-
-    <!-- Resultado do Formulário 2 (Lado Direito) -->
-    <div id="userResultContainer" class="result-container"></div>
+    <!-- Dock no estilo macOS com ícone de tema -->
+    <div class="dock">
+        <div class="icon" onclick="showForm('gponForm')">
+            <i class="fas fa-network-wired"></i>
+        </div>
+        <div class="icon" onclick="showForm('userForm')">
+            <i class="fas fa-user"></i>
+        </div>
+        <div class="icon" onclick="toggleTheme()">
+            <i class="fas fa-moon"></i>
+        </div>
+    </div>
 
     <script>
+        // Função para alternar entre os formulários
+        function showForm(formId) {
+            // Oculta todos os formulários
+            document.querySelectorAll('.form-container').forEach(form => {
+                form.classList.remove('active');
+            });
+
+            // Exibe o formulário selecionado
+            document.getElementById(`${formId}Container`).classList.add('active');
+        }
+
+        // Função para alternar entre os temas light e dark
+        function toggleTheme() {
+            const body = document.body;
+            body.classList.toggle('dark-theme');
+            const themeIcon = document.querySelector('.fa-moon');
+            if (body.classList.contains('dark-theme')) {
+                themeIcon.classList.replace('fa-moon', 'fa-sun');
+            } else {
+                themeIcon.classList.replace('fa-sun', 'fa-moon');
+            }
+        }
+
+        // Função para gerar a configuração GPON
         function generateConfig(event) {
-            event.preventDefault(); // Evitar o envio real do formulário
+            event.preventDefault();
 
             const serialNumber = document.getElementById('serialNumber').value;
             const frame = document.getElementById('frame').value;
@@ -214,7 +382,7 @@ Eqtl#T3l3com
 `;
 
             const resultContainer = document.getElementById('resultContainer');
-            resultContainer.innerHTML = ''; // Limpar conteúdo anterior
+            resultContainer.innerHTML = '';
 
             const table = document.createElement('table');
             const headerRow = table.insertRow();
@@ -237,7 +405,7 @@ Eqtl#T3l3com
                 copyButton.onclick = () => {
                     navigator.clipboard.writeText(line)
                         .then(() => {
-                            copyButton.classList.add('clicked'); // Adicionar classe para mudar a cor do botão
+                            copyButton.classList.add('clicked');
                         })
                         .catch((err) => {
                             console.error('Erro ao copiar: ', err);
@@ -249,26 +417,23 @@ Eqtl#T3l3com
             resultContainer.appendChild(table);
         }
 
+        // Função para gerar a configuração de usuário
         function generateUserConfig(event) {
-            event.preventDefault(); // Evitar o envio real do formulário
+            event.preventDefault();
 
             const nomeInput = document.getElementById('nome');
             const cpfInput = document.getElementById('cpf');
 
-            // Regex para pegar apenas o primeiro nome
             const nome = nomeInput.value.match(/^\S+/)[0];
-
-            // Regex para validar e formatar o CPF
-            const cpf = cpfInput.value.replace(/\D/g, ''); // Remove todos os não dígitos
+            const cpf = cpfInput.value.replace(/\D/g, '');
             if (cpf.length !== 11) {
                 alert('CPF inválido. Por favor, insira um CPF válido.');
                 return;
             }
-            const cpfFormatado = cpf.substring(0, 6); // Pega os 6 primeiros dígitos
+            const cpfFormatado = cpf.substring(0, 6);
 
-            // Lógica de concatenação
-            const user = cpfFormatado + nome; // Primeiros 6 dígitos do CPF + nome
-            const cpfFinal = cpfFormatado + '@' + nome; // Nome + primeiros 6 dígitos do CPF
+            const user = cpfFormatado + nome;
+            const cpfFinal = cpfFormatado + '@' + nome;
 
             const userConfigCode = `
 system-view
@@ -280,7 +445,7 @@ commit
 `;
 
             const userResultContainer = document.getElementById('userResultContainer');
-            userResultContainer.innerHTML = ''; // Limpar conteúdo anterior
+            userResultContainer.innerHTML = '';
 
             const pre = document.createElement('pre');
             pre.textContent = userConfigCode.trim();
@@ -291,7 +456,7 @@ commit
             copyButton.onclick = () => {
                 navigator.clipboard.writeText(userConfigCode.trim())
                     .then(() => {
-                        copyButton.classList.add('clicked'); // Adicionar classe para mudar a cor do botão
+                        copyButton.classList.add('clicked');
                     })
                     .catch((err) => {
                         console.error('Erro ao copiar: ', err);
@@ -302,6 +467,7 @@ commit
             userResultContainer.appendChild(copyButton);
         }
 
+        // Função para atualizar o campo de upload
         function updateUpload() {
             const downloadInput = document.getElementById('download');
             const uploadInput = document.getElementById('upload');
@@ -311,28 +477,7 @@ commit
             uploadInput.value = uploadValue.toString();
         }
 
-        const ponSelect = document.getElementById('pon');
-        const descriptionParagraph = document.getElementById('ponDescription');
-        ponSelect.addEventListener('change', () => {
-            const selectedValue = parseInt(ponSelect.value);
-            const descriptions = [
-                "GRAN VILLAGE ARACAGY 1",
-                "GRAN VILLAGE ARACAGY 2",
-                "COND. SPORT GARDENS",
-                "COND. GRAND PARK PASSAROS",
-                "COND. GRAND PARK AGUAS",
-                "COND. GRAND PARK BARCELONA",
-                "COND. BOSQUE DOS PINHEIROS",
-                "COND. ALLIANCE"
-            ];
-
-            if (!isNaN(selectedValue) && selectedValue >= 0 && selectedValue < descriptions.length) {
-                descriptionParagraph.textContent = descriptions[selectedValue];
-            } else {
-                descriptionParagraph.textContent = '';
-            }
-        });
-
+        // Adiciona as opções de ONU ID
         const onuIdSelect = document.getElementById('onuId');
         for (let i = 0; i <= 128; i++) {
             const option = document.createElement('option');
@@ -348,6 +493,12 @@ commit
             if (value.length > 11) value = value.substring(0, 11);
             value = value.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
             e.target.value = value;
+        });
+
+        // Máscara para o campo clientName
+        const clientNameInput = document.getElementById('clientName');
+        clientNameInput.addEventListener('input', (e) => {
+            e.target.value = e.target.value.replace(/[^a-zA-Z\s]/g, '');
         });
     </script>
 </body>

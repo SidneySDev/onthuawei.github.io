@@ -178,6 +178,43 @@
             border-color: #4CAF50;
             box-shadow: 0 0 5px rgba(76, 175, 80, 0.5);
         }
+        /* Estilo da notificação */
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            opacity: 0;
+            transform: translateY(100%);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 16px;
+        }
+        .notification.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .notification i {
+            font-size: 20px;
+        }
+        /* Destaque no campo onuId */
+        @keyframes highlight {
+            0% { border-color: #4CAF50; }
+            50% { border-color: #ffeb3b; }
+            100% { border-color: #4CAF50; }
+        }
+        .highlight-onuId {
+            animation: highlight 1.5s ease-in-out;
+            border: 2px solid #4CAF50;
+            border-radius: 4px;
+        }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 </head>
@@ -314,6 +351,12 @@
         </div>
     </div>
 
+    <!-- Notificação -->
+    <div id="notification" class="notification">
+        <i class="fas fa-exclamation-circle"></i>
+        Atualize a numeração no campo ONT ID após utilizar esse comando e Click no Botão de Gerar Código!
+    </div>
+
     <script>
         // Função para alternar entre os formulários
         function showForm(formId) {
@@ -323,7 +366,7 @@
             });
 
             // Exibe o formulário selecionado
-            document.getElementById(`${formId}Container`).classList.add('active');
+                        document.getElementById(`${formId}Container`).classList.add('active');
         }
 
         // Função para alternar entre os temas light e dark
@@ -406,6 +449,28 @@ Eqtl#T3l3com
                     navigator.clipboard.writeText(line)
                         .then(() => {
                             copyButton.classList.add('clicked');
+
+                            // Verifica se a linha contém o comando "ont add"
+                            if (line.includes('ont add')) {
+                                // Foca no campo onuId
+                                const onuIdField = document.getElementById('onuId');
+                                onuIdField.focus();
+
+                                // Adiciona destaque ao campo onuId
+                                onuIdField.classList.add('highlight-onuId');
+                                setTimeout(() => {
+                                    onuIdField.classList.remove('highlight-onuId');
+                                }, 1500); // Remove o destaque após 1.5 segundos
+
+                                // Exibe a notificação
+                                const notification = document.getElementById('notification');
+                                notification.classList.add('show');
+
+                                // Oculta a notificação após 3 segundos
+                                setTimeout(() => {
+                                    notification.classList.remove('show');
+                                }, 3000);
+                            }
                         })
                         .catch((err) => {
                             console.error('Erro ao copiar: ', err);
@@ -503,3 +568,4 @@ commit
     </script>
 </body>
 </html>
+            

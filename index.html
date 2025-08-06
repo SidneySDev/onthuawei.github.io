@@ -419,9 +419,11 @@ ont wan-access http ${frame}/${slot}/${pon} ${onuId} enable
 q
 save
 q
-display ont info ${pon} ${onuId}
+interface gpon 0/1 
 q
-Eqtl#T3l3com
+display ont info ${pon} ${onuId} | include mask
+q
+Senha Nova da ONT: Eqtl#T3l3com
 `;
 
             const resultContainer = document.getElementById('resultContainer');
@@ -569,3 +571,4 @@ commit
 </body>
 </html>
             
+

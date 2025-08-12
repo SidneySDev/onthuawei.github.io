@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Provisionamento ONT HUAWEI</title>
+    <title>Provisionamento ONT HUAWEI NOC EQTL</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -50,6 +50,8 @@
             border-radius: 8px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
             transition: background-color 0.3s ease, color 0.3s ease;
+            overflow-y: auto;
+            max-height: 70vh;
         }
         .dark-theme .result-container {
             background-color: #555;
@@ -152,8 +154,9 @@
             border: none;
             border-radius: 4px;
             cursor: pointer;
+            transition: all 0.3s ease;
         }
-        .copy-button.clicked {
+        .copy-button.copied {
             background-color: #ff0000;
         }
         .input-container {
@@ -178,7 +181,6 @@
             border-color: #4CAF50;
             box-shadow: 0 0 5px rgba(76, 175, 80, 0.5);
         }
-        /* Estilo da notificação */
         .notification {
             position: fixed;
             bottom: 20px;
@@ -204,7 +206,6 @@
         .notification i {
             font-size: 20px;
         }
-        /* Destaque no campo onuId */
         @keyframes highlight {
             0% { border-color: #4CAF50; }
             50% { border-color: #ffeb3b; }
@@ -214,6 +215,44 @@
             animation: highlight 1.5s ease-in-out;
             border: 2px solid #4CAF50;
             border-radius: 4px;
+        }
+        .command-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+            border-left: 4px solid #4CAF50;
+        }
+        .dark-theme .command-section {
+            background-color: #444;
+        }
+        .section-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #4CAF50;
+        }
+        .step-number {
+            display: inline-block;
+            width: 25px;
+            height: 25px;
+            background-color: #4CAF50;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+        .command-line {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+            padding: 5px;
+            background-color: #fff;
+            border-radius: 3px;
+        }
+        .dark-theme .command-line {
+            background-color: #555;
         }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
@@ -354,10 +393,15 @@
     <!-- Notificação -->
     <div id="notification" class="notification">
         <i class="fas fa-exclamation-circle"></i>
-        Atualize a numeração no campo ONT ID após utilizar esse comando e Click no Botão de Gerar Código!
+        <div>
+            <strong>ATENÇÃO:</strong> Após executar o comando "ont add", verifique o ONT ID disponível na OLT e atualize o campo ONT ID antes de continuar com os próximos comandos!
+        </div>
     </div>
 
     <script>
+        // Variável para armazenar os botões já copiados
+        const copiedButtons = new Set();
+
         // Função para alternar entre os formulários
         function showForm(formId) {
             // Oculta todos os formulários
@@ -366,7 +410,7 @@
             });
 
             // Exibe o formulário selecionado
-                        document.getElementById(`${formId}Container`).classList.add('active');
+            document.getElementById(`${formId}Container`).classList.add('active');
         }
 
         // Função para alternar entre os temas light e dark
@@ -400,87 +444,144 @@
             const upload = document.getElementById('upload').value;
             const onuId = document.getElementById('onuId').value;
 
-            const configCode = `
-enable
-config
-interface gpon ${frame}/${slot}
-ont add ${pon} sn-auth ${serialNumber} omci ont-lineprofile-id ${lineProfileID} ont-srvprofile-id ${serviceProfileID} desc "${clientName}"
-ont ipconfig ${pon} ${onuId} pppoe vlan ${vlan} priority 5 user-account username ${username} password ${password}
-ont wan-config ${pon} ${onuId} ip-index 0 profile-id ${serviceProfileID}
-ont internet-config ${pon} ${onuId} ip-index 0
-ont port route ${pon} ${onuId} eth 1 enable
-ont port route ${pon} ${onuId} eth 2 enable
-ont port route ${pon} ${onuId} eth 3 enable
-ont port route ${pon} ${onuId} eth 4 enable
-q
-service-port vlan ${vlan} gpon ${frame}/${slot}/${pon} ont ${onuId} gemport ${gemport} multi-service user-vlan ${vlan} tag-transform translate rx-cttr ${download} tx-cttr ${upload}
-diagnose
-ont wan-access http ${frame}/${slot}/${pon} ${onuId} enable
-q
-save
-q
-interface gpon 0/1 
-display ont info ${pon} ${onuId} | include mask
-q
-Senha Nova da ONT: Eqtl#T3l3com
-`;
+            const configSections = [
+                {
+                    title: "1. Habilitar modo de configuração",
+                    commands: [
+                        "enable",
+                        "config"
+                    ]
+                },
+                {
+                    title: "2. Adicionar ONT à OLT",
+                    commands: [
+                        `interface gpon ${frame}/${slot}`,
+                        `ont add ${pon} sn-auth ${serialNumber} omci ont-lineprofile-id ${lineProfileID} ont-srvprofile-id ${serviceProfileID} desc "${clientName}"`
+                    ],
+                    important: true
+                },
+                {
+                    title: "3. Configurar PPPoE e VLAN",
+                    commands: [
+                        `ont ipconfig ${pon} ${onuId} pppoe vlan ${vlan} priority 5 user-account username ${username} password ${password}`,
+                        `ont wan-config ${pon} ${onuId} ip-index 0 profile-id ${serviceProfileID}`,
+                        `ont internet-config ${pon} ${onuId} ip-index 0`
+                    ]
+                },
+                {
+                    title: "4. Habilitar portas Ethernet(Algumas ONTs não tem suporte)",
+                    commands: [
+                        `ont port route ${pon} ${onuId} eth 1 enable`,
+                        `ont port route ${pon} ${onuId} eth 2 enable`,
+                        `ont port route ${pon} ${onuId} eth 3 enable`,
+                        `ont port route ${pon} ${onuId} eth 4 enable`,
+                        "q"
+                    ]
+                },
+                {
+                    title: "5. Criar service-port",
+                    commands: [
+                        `service-port vlan ${vlan} gpon ${frame}/${slot}/${pon} ont ${onuId} gemport ${gemport} multi-service user-vlan ${vlan} tag-transform translate rx-cttr ${download} tx-cttr ${upload}`
+                    ]
+                },
+                {
+                    title: "6. Habilitar acesso HTTP",
+                    commands: [
+                        "diagnose",
+                        `ont wan-access http ${frame}/${slot}/${pon} ${onuId} enable`,
+                        "q"
+                    ]
+                },
+                {
+                    title: "7. Salvar configuração",
+                    commands: [
+                        "save",
+                        "q"
+                    ]
+                },
+                {
+                    title: "8. Verificar IP da ONT",
+                    commands: [
+                        `interface gpon ${frame}/${slot}`,
+                        `display ont info ${pon} ${onuId} | include mask`,
+                        "q"
+                    ]
+                },
+                {
+                    title: "Nova Senha de Login ONT",
+                    commands: [
+                        "Eqtl#T3l3com"
+                    ]
+                }
+            ];
 
             const resultContainer = document.getElementById('resultContainer');
             resultContainer.innerHTML = '';
 
-            const table = document.createElement('table');
-            const headerRow = table.insertRow();
-            ['Configuração', 'Ação'].forEach((headerText) => {
-                const th = document.createElement('th');
-                th.textContent = headerText;
-                headerRow.appendChild(th);
+            configSections.forEach((section, sectionIndex) => {
+                const sectionDiv = document.createElement('div');
+                sectionDiv.className = 'command-section';
+                
+                const titleDiv = document.createElement('div');
+                titleDiv.className = 'section-title';
+                titleDiv.innerHTML = `<span class="step-number">${sectionIndex + 1}</span>${section.title}`;
+                sectionDiv.appendChild(titleDiv);
+
+                section.commands.forEach((command) => {
+                    const commandLine = document.createElement('div');
+                    commandLine.className = 'command-line';
+                    
+                    const commandText = document.createElement('span');
+                    commandText.textContent = command;
+                    commandLine.appendChild(commandText);
+                    
+                    const copyButton = document.createElement('button');
+                    copyButton.textContent = 'Copiar';
+                    copyButton.className = 'copy-button';
+                    
+                    // Verifica se este botão já foi copiado antes
+                    if (copiedButtons.has(command)) {
+                        copyButton.classList.add('copied');
+                        copyButton.textContent = 'Copiado!';
+                    }
+                    
+                    copyButton.onclick = () => {
+                        navigator.clipboard.writeText(command)
+                            .then(() => {
+                                // Adiciona a classe 'copied' e atualiza o texto
+                                copyButton.classList.add('copied');
+                                copyButton.textContent = 'Copiado!';
+                                
+                                // Adiciona ao conjunto de comandos copiados
+                                copiedButtons.add(command);
+                                
+                                // Se for o comando "ont add", destacar o campo ONT ID
+                                if (command.includes('ont add') && section.important) {
+                                    const onuIdField = document.getElementById('onuId');
+                                    onuIdField.focus();
+                                    onuIdField.classList.add('highlight-onuId');
+                                    
+                                    // Mostrar notificação
+                                    const notification = document.getElementById('notification');
+                                    notification.classList.add('show');
+                                    
+                                    setTimeout(() => {
+                                        onuIdField.classList.remove('highlight-onuId');
+                                        notification.classList.remove('show');
+                                    }, 5000);
+                                }
+                            })
+                            .catch((err) => {
+                                console.error('Erro ao copiar: ', err);
+                            });
+                    };
+                    commandLine.appendChild(copyButton);
+                    
+                    sectionDiv.appendChild(commandLine);
+                });
+
+                resultContainer.appendChild(sectionDiv);
             });
-
-            const lines = configCode.trim().split('\n');
-            lines.forEach((line) => {
-                const row = table.insertRow();
-                const configCell = row.insertCell();
-                configCell.textContent = line;
-
-                const copyCell = row.insertCell();
-                const copyButton = document.createElement('button');
-                copyButton.textContent = 'Copiar';
-                copyButton.classList.add('copy-button');
-                copyButton.onclick = () => {
-                    navigator.clipboard.writeText(line)
-                        .then(() => {
-                            copyButton.classList.add('clicked');
-
-                            // Verifica se a linha contém o comando "ont add"
-                            if (line.includes('ont add')) {
-                                // Foca no campo onuId
-                                const onuIdField = document.getElementById('onuId');
-                                onuIdField.focus();
-
-                                // Adiciona destaque ao campo onuId
-                                onuIdField.classList.add('highlight-onuId');
-                                setTimeout(() => {
-                                    onuIdField.classList.remove('highlight-onuId');
-                                }, 1500); // Remove o destaque após 1.5 segundos
-
-                                // Exibe a notificação
-                                const notification = document.getElementById('notification');
-                                notification.classList.add('show');
-
-                                // Oculta a notificação após 3 segundos
-                                setTimeout(() => {
-                                    notification.classList.remove('show');
-                                }, 3000);
-                            }
-                        })
-                        .catch((err) => {
-                            console.error('Erro ao copiar: ', err);
-                        });
-                };
-                copyCell.appendChild(copyButton);
-            });
-
-            resultContainer.appendChild(table);
         }
 
         // Função para gerar a configuração de usuário
@@ -519,10 +620,22 @@ commit
             const copyButton = document.createElement('button');
             copyButton.textContent = 'Copiar Código';
             copyButton.classList.add('copy-button');
+            
+            // Verifica se este botão já foi copiado antes
+            if (copiedButtons.has(userConfigCode.trim())) {
+                copyButton.classList.add('copied');
+                copyButton.textContent = 'Copiado!';
+            }
+            
             copyButton.onclick = () => {
                 navigator.clipboard.writeText(userConfigCode.trim())
                     .then(() => {
-                        copyButton.classList.add('clicked');
+                        // Adiciona a classe 'copied' e atualiza o texto
+                        copyButton.classList.add('copied');
+                        copyButton.textContent = 'Copiado!';
+                        
+                        // Adiciona ao conjunto de comandos copiados
+                        copiedButtons.add(userConfigCode.trim());
                     })
                     .catch((err) => {
                         console.error('Erro ao copiar: ', err);
@@ -566,9 +679,9 @@ commit
         clientNameInput.addEventListener('input', (e) => {
             e.target.value = e.target.value.replace(/[^a-zA-Z\s]/g, '');
         });
+
+        // Inicializa o campo de upload
+        updateUpload();
     </script>
 </body>
 </html>
-            
-
-

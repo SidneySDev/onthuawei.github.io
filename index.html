@@ -185,7 +185,7 @@
             position: fixed;
             bottom: 20px;
             right: 20px;
-            background-color: #4CAF50;
+            background-color: #ff0000;
             color: white;
             padding: 15px 20px;
             border-radius: 8px;
@@ -259,7 +259,7 @@
 </head>
 
 <body class="light-theme">
-    <h2>Configuração GPON</h2>
+    <h2>Provisionamento ONTs Huawei - Equatorial Telecom</h2>
 
     <!-- Formulário 1: Configuração GPON -->
     <div id="gponFormContainer" class="form-container active">
@@ -379,12 +379,7 @@
 
     <!-- Dock no estilo macOS com ícone de tema -->
     <div class="dock">
-        <div class="icon" onclick="showForm('gponForm')">
-            <i class="fas fa-network-wired"></i>
-        </div>
-        <div class="icon" onclick="showForm('userForm')">
-            <i class="fas fa-user"></i>
-        </div>
+     
         <div class="icon" onclick="toggleTheme()">
             <i class="fas fa-moon"></i>
         </div>
@@ -446,14 +441,20 @@
 
             const configSections = [
                 {
-                    title: "1. Habilitar modo de configuração",
+                    title: "Habilitar modo de configuração",
                     commands: [
                         "enable",
-                        "config"
+                        "config",
                     ]
                 },
                 {
-                    title: "2. Adicionar ONT à OLT",
+                  title:"Localizar ONT",
+                  commands: [
+                        "display ont autofind all"
+                    ]
+                },
+                {
+                    title: "Adicionar ONT à OLT",
                     commands: [
                         `interface gpon ${frame}/${slot}`,
                         `ont add ${pon} sn-auth ${serialNumber} omci ont-lineprofile-id ${lineProfileID} ont-srvprofile-id ${serviceProfileID} desc "${clientName}"`
@@ -461,7 +462,7 @@
                     important: true
                 },
                 {
-                    title: "3. Configurar PPPoE e VLAN",
+                    title: "Configurar PPPoE e VLAN",
                     commands: [
                         `ont ipconfig ${pon} ${onuId} pppoe vlan ${vlan} priority 5 user-account username ${username} password ${password}`,
                         `ont wan-config ${pon} ${onuId} ip-index 0 profile-id ${serviceProfileID}`,
@@ -469,7 +470,7 @@
                     ]
                 },
                 {
-                    title: "4. Habilitar portas Ethernet(Algumas ONTs não tem suporte)",
+                    title: "Habilitar portas Ethernet(Algumas ONTs não tem suporte)",
                     commands: [
                         `ont port route ${pon} ${onuId} eth 1 enable`,
                         `ont port route ${pon} ${onuId} eth 2 enable`,
@@ -479,13 +480,13 @@
                     ]
                 },
                 {
-                    title: "5. Criar service-port",
+                    title: "Criar service-port",
                     commands: [
                         `service-port vlan ${vlan} gpon ${frame}/${slot}/${pon} ont ${onuId} gemport ${gemport} multi-service user-vlan ${vlan} tag-transform translate rx-cttr ${download} tx-cttr ${upload}`
                     ]
                 },
                 {
-                    title: "6. Habilitar acesso HTTP",
+                    title: "Habilitar acesso HTTP",
                     commands: [
                         "diagnose",
                         `ont wan-access http ${frame}/${slot}/${pon} ${onuId} enable`,
@@ -493,7 +494,7 @@
                     ]
                 },
                 {
-                    title: "7. Salvar configuração",
+                    title: "Salvar configuração",
                     commands: [
                         "save",
                         "q"
@@ -685,3 +686,4 @@ commit
     </script>
 </body>
 </html>
+
